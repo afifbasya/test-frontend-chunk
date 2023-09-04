@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Resumable.js File Upload</title>
+  </head>
+  <body>
+    <h1>Upload File using Resumable.js</h1>
+    <input type="file" id="fileInput" />
+    <button id="startUpload">Start Upload</button>
+    <div id="progress"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/resumable.js/1.1.0/resumable.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const fileInput = document.getElementById("fileInput");
+        const startUploadButton = document.getElementById("startUpload");
+        const progressDiv = document.getElementById("progress");
+
+        const resumable = new Resumable({
+          target: "http://localhost/api/upload", // Replace with your endpoint URL
+          chunkSize: 1 * 1024 * 1024, // Chunk size (1MB)
+          simultaneousUploads: 3, // Number of uploads to run in parallel
+          testChunks: false,
+          maxFiles: 1, // Maximum number of files allowed to be uploaded
+          fileParameterName: "file",
+          headers: {
+            // Add headers as needed
+          },
+        });
+
+        resumable.assignBrowse(fileInput);
+
+        resumable.on("fileAdded", function (file) {
+          startUploadButton.addEventListener("click", function () {
+            resumable.upload();
+          });
+        });
+
+        resumable.on("fileSuccess", function (file, message) {
+          progressDiv.innerHTML = "Upload successful!";
+        });
+
+        resumable.on("fileError", function (file, message) {
+          progressDiv.innerHTML = "Error: " + message;
+        });
+
+        resumable.on("progress", function () {
+          const progress = (resumable.progress() * 100).toFixed(2) + "%";
+          progressDiv.innerHTML = "Progress: " + progress;
+        });
+      });
+    </script>
+  </body>
+</html>
